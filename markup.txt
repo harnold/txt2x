@@ -1,0 +1,369 @@
+
+                               Markup for txt2x
+
+
+This document specifies the markup that is accepted by txt2x.  This text is
+itself a valid txt2x document.
+
+
+Markup elements
+===============
+
+For each markup element, the translation to XML is demonstrated by an example.
+In the examples, '> ' marks the beginning of a line.
+
+
+Document title (title)
+----------------------
+
+Indented text at the top level is interpreted as a title.  There can be more
+than one title element.
+
+Example:
+
+"""
+    >       The Adventures of Sherlock Holmes
+    >
+    >           by Sir Arthur Conan Doyle
+"""
+
+is translated to
+
+"""
+    <title>The Adventures of Sherlock Holmes</title>
+    <title>by Sir Arthur Conan Doyle</title>
+"""
+
+
+Sections (sec, subsec, subsubsec, heading)
+------------------------------------------
+
+Underlined headings generate sections.  The symbols used for underlining a
+heading define its level: '*****' - first level; '=====' - second level;
+'-----' - third level.  An underline must begin with five identical symbols.
+Each section extends until the next element of the same or higher level.
+
+Example:
+
+"""
+    > Markup for txt2x
+    > ****************
+    >
+    > Markup elements
+    > ===============
+    >
+    > Sections
+    > --------
+    >
+    > Underlined headings...
+"""
+
+is translated to
+
+"""
+    <sec>
+        <heading>Markup for txt2x</heading>
+        <subsec>
+            <heading>Markup Elements</heading>
+            <subsubsec>
+                <heading>Sections</heading>
+                <para>
+                    <text>Underlines headings...</text>
+                </para>
+            </subsubsec>
+        </subsec>
+    </sec>
+"""
+
+
+Paragraphs (para)
+-----------------
+
+Text blocks surrounded by empty lines are interpreted as paragraphs.
+
+Example:
+
+"""
+    >
+    > I had called upon my friend, Mr. Sherlock Holmes, one day in the autumn
+    > of last year and found him in deep conversation with a very stout,
+    > florid-faced, elderly gentleman with fiery red hair.  With an apology
+    > for my intrusion, I was about to withdraw when Holmes pulled me abruptly
+    > into the room and closed the door behind me.
+    >
+"""
+
+is translated to:
+
+"""
+    <para>
+        <text>I had called upon my friend, Mr. Sherlock Holmes, one day in the
+        autumn of last year and found him in deep conversation with a very
+        stout, florid-faced, elderly gentleman with fiery red hair.  With an
+        apology for my intrusion, I was about to withdraw when Holmes pulled
+        me abruptly into the room and closed the door behind me.</text>
+    <para>
+"""
+
+
+Text (text)
+-----------
+
+Text without markup is interpreted as unformatted text.  See the 'paragraph'
+element for an example.
+
+
+Preformatted text (pre)
+-----------------------
+
+Text enclosed by '"""' (three successive double quotes) is interpreted as
+preformatted text.  For such text, all indentations and other formatting are
+preserved.  Preformatted text is translated literally, without any further
+interpretation.
+
+Note that preformatted text cannot contain '"""' because this markup
+unconditionally terminates the preformatted text mode.  In the source of the
+following example, we therefore have to replace each double quote symbol by
+the corresponding XML entity '&quot;'.  Additionally, the XML generator has
+to replace the symbol '>' by its entity '&gt;'.
+
+Example:
+
+"""
+    > Rule for preformatted text.
+    >
+    > &quot;&quot;&quot;
+    >     parser_pre(In, Out) –>
+    >         [ sym_pre ], parser_cdata(T), [ sym_pre ],
+    >         {
+    >             parser_append_child(In, pre(T), Out)
+    >         }.
+    > &quot;&quot;&quot;
+"""
+
+is translated to
+
+"""
+    <para>
+        <text>Rule for preformatted text.</text>
+    </para>
+    <pre>
+        parser_pre(In, Out) –&gt;
+            [ sym_pre ], parser_cdata(T), [ sym_pre ],
+            {
+                parser_append_child(In, pre(T), Out)
+            }.
+    </pre>
+"""
+
+
+URLs and email addresses (url, email)
+-------------------------------------
+
+txt2x recognizes URLs for the protocols 'http', 'ftp', and 'file', as well as
+email addresses, and translates them to separate elements.
+
+Example:
+
+"""
+    > "I'm doing a (free) operating system (just a hobby, won't be big and
+    > professional like gnu) for 386(486) AT clones.
+    >
+    >     Linus (torvalds@kruuna.helsinki.fi)"
+    >
+    > Today, this kernel can be downloaded from http://kernel.org.
+"""
+
+is translated to
+
+"""
+    <para>
+        <text>"I'm doing a (free) operating system (just a hobby, won't be
+        big and professional like gnu) for 386(486) AT clones.</text>
+    </para>
+    <para>
+        <text>Linus (</text>
+        <email>torvalds@kruuna.helsinki.fi</email>
+        <text>)"</text>
+    </para>
+    <para>
+        <text>Today, this kernel can be downloaded from</text>
+        <url>http://kernel.org</url>
+        <text>.</text>
+    </para>
+"""
+
+
+Images (image, filename)
+------------------------
+
+To insert an image into the document, write the file name on a separate line,
+surrounded by '<<' and '>>'.  Txt2x does not check whether the file name
+actually refers to an image file.
+
+Example:
+
+"""
+    > The following photograph shows a ring-tailed lemur,
+    > the best known of the lemurs living on Madagascar.
+    >
+    > <<ring-tailed-lemur.jpg>>
+"""
+
+is translated to
+
+"""
+    <para>
+        <text>The following photograph shows a ring-tailed lemur,
+        the best known of the lemurs living on Madagascar.</text>
+    </para>
+    <image>
+        <filename>ring-tailed-lemur.jpg</filename>
+    </image>
+"""
+
+
+Tables (table, tablehdrow, tablerow, tablehditem, tableitem)
+------------------------------------------------------------
+
+Txt2x can recognize tables.  The columns of a table must be separated by '|',
+the rows must be separated by '-----'.  If the first row is underlined using
+"=====", it is interpreted as a title row.  Tables must be surrounded by empty
+lines.
+
+Example:
+
+"""
+    >
+    > Chapter | Title
+    > =======================================
+    >   1     | Mr. Sherlock Holmes
+    > ---------------------------------------
+    >   2     | The Curse of the Baskervilles
+    > ---------------------------------------
+    >   3     | The Problem
+    >
+"""
+
+is translated to
+
+"""
+    <table>
+        <tablehdrow>
+            <tablehditem><text>Chapter</text></tablehditem>
+            <tablehditem><text>Title</text></tablehditem>
+        </tablehdrow>
+        <tablerow>
+            <tableitem><text>1</text></tableitem>
+            <tableitem><text>Mr. Sherlock Holmes</text></tableitem>
+        </tablerow>
+        <tablerow>
+            <tableitem><text>2</text></tableitem>
+            <tableitem><text>The Curse of the Baskervilles</text></tableitem>
+        </tablerow>
+        <tablerow>
+            <tableitem><text>3</text></tableitem>
+            <tableitem><text>The Problem</text></tableitem>
+        </tablerow>
+    </table>
+"""
+
+
+Item lists (list, listitem)
+---------------------------
+
+Lines that begin with "- " are intepreted as items in a list.  Item lists must
+be surrounded by empty lines.
+
+Example:
+
+"""
+    > The book "The Adventures of Sherlock Holmes" includes the following
+    > adventures:
+    >
+    > - A Scandal in Bohemia
+    > - The Red-Headed League
+    > - A Case of Identity
+    >
+"""
+
+is translated to
+
+"""
+    <para>
+        <text>The book "The Adventures of Sherlock Holmes" includes the
+        following adventures:</text>
+    </para>
+    <list>
+        <listitem><text>A Scandal in Bohemia</text></listitem>
+        <listitem><text>The Red-Headed League</text></listitem>
+        <listitem><text>A Case of Identity</text></listitem>
+    </list>
+"""
+
+
+Enumeration lists (enum, enumitem)
+----------------------------------
+
+Lines that begin with "# " are interpreted as items in an enumeration list.
+Enumeration lists must be surrounded by empty lines.
+
+Example:
+
+"""
+    > The book "The Sign of the Four" begins with the following chapters:
+    >
+    > # The Science of Deduction
+    > # The Statement of the Case
+    > # In Quest of a Solution
+    >
+"""
+
+is translated to:
+
+"""
+    <para>
+        <text>The book "The Sign of the Four" begins with the following
+        chapters:</text>
+    </para>
+    <enum>
+        <enumitem><text>The Science of Deduction</text></enumitem>
+        <enumitem><text>The Statement of the Case</text></enumitem>
+        <enumitem><text>In Quest of a Solution</text></enumitem>
+    </enum>
+"""
+
+
+XML Document Type Definition
+============================
+
+The XML files generated by the txt2xml command are instances of the document
+type specified by the following DTD:
+
+"""
+  <?xml version="1.0"?>
+  <!DOCTYPE doc [
+  <!ELEMENT doc (title|sec|subsec|subsubsec|para|pre|table|list|enum|image)*>
+  <!ELEMENT sec (heading, (subsec|subsubsec|para|pre|table|list|enum|image)*)>
+  <!ELEMENT subsec (heading, (subsubsec|para|pre|table|list|enum|image)*)>
+  <!ELEMENT subsubsec (heading, (para|pre|table|list|enum|image)*)>
+  <!ELEMENT para (text|url|email)*>
+  <!ELEMENT title (#PCDATA)>
+  <!ELEMENT heading (#PCDATA)>
+  <!ELEMENT text (#PCDATA)>
+  <!ELEMENT pre (#PCDATA)>
+  <!ELEMENT url (#PCDATA)>
+  <!ELEMENT email (#PCDATA)>
+  <!ELEMENT table (tablehdrow?, tablerow+)>
+  <!ELEMENT tablerow (tableitem, tableitem+)>
+  <!ELEMENT tablehdrow (tablehditem, tablehditem+)>
+  <!ELEMENT tableitem (text|url|email)*>
+  <!ELEMENT tablehditem (text|url|email)*>
+  <!ELEMENT list (listitem)+>
+  <!ELEMENT listitem (text|url|email)*>
+  <!ELEMENT enum (enumitem)+>
+  <!ELEMENT enumitem (text|url|email)*>
+  <!ELEMENT image (filename)>
+  <!ELEMENT filename (#PCDATA)>
+  ]>
+"""

@@ -1,0 +1,57 @@
+
+                                    TXT2X
+
+
+Introduction
+============
+
+Txt2x is a tool for generating HTML and XML documents from plain text
+files written using a simple and unobtrusive markup.  It is similar in
+function to Markdown [1] or AsciiDoc [2] (actually, it predates these
+tools by a few years).
+
+[1] http://daringfireball.net/projects/markdown/
+[2] http://www.methods.co.nz/asciidoc/
+
+(The HTML generator is currently not available from this repository
+because I was not yet able to contact its original co-author to ask for
+his permission.  However, a similar HTML generator can be obtained by
+modifying the XML generator in the file genxml.pl, which requires only
+trivial changes.)
+
+
+Usage
+=====
+
+Since txt2x is a Prolog program, you need a Prolog system to use it.
+Txt2x has only been tested on SWI Prolog, but it should run on any
+reasonably standard Prolog system.
+
+To generate an HTML file <name>.html from the text file <name>.txt, use
+the following commands:
+
+"""
+  ?- consult(txt2html).
+  ?- txt2html('<name>.txt' '<name>.html').
+"""
+
+To generate an XML file <name>.xml from the text file <name>.txt, use the
+following commands:
+
+"""
+  ?- consult(txt2xml).
+  ?- txt2xml('<name>.txt' '<name>.xml').
+"""
+
+
+Markup
+======
+
+The markup accepted by txt2x is specified in the file markup.txt.
+
+
+License
+=======
+
+Txt2x is licensed under the conditions specified in the accompanying
+LICENSE file.
